@@ -4,7 +4,7 @@ from distribution_functions import *
 from graphic_util import *
 
 matplotlib.use('TkAgg')
-n_points = 13
+n_points = 21
 x, y, mesh = create_mesh2d(n_points)
 
 dist_functions = [gaussian, exp_decay]
@@ -21,7 +21,7 @@ for dist_function in dist_functions:
     # Plot the Gaussian distribution with grid lines
     fig, ax = plt.subplots()
     im = ax.pcolormesh(x, y, z, cmap='viridis', edgecolors='black', linewidth=0.5)
-    fig.colorbar(im, )
+    fig.colorbar(im,)
 
     plt.xlabel('x')
     plt.ylabel('y')
