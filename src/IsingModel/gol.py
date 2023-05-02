@@ -23,7 +23,7 @@ __author__ = 'David Ressurreição & Sancho Simões (based on the original GameO
 class GameOfIce(simcx.Simulator):
     """A Game of Life simulator."""
 
-    def __init__(self, width=50, height=50, neighbour_size=1):
+    def __init__(self, width=50, height=50, neighbour_size=1, func="gaussian"):
         super(GameOfIce, self).__init__()
         self.width = width
         self.height = height
@@ -34,7 +34,10 @@ class GameOfIce(simcx.Simulator):
         # Replace the center to 0
         center_x, center_y = np.array((width, height)) // 2
         x, y, mesh = create_mesh2d(width, height, min=0, max=width)
-        grid = gaussian(mesh, mean=(center_x, center_y), std=(width ** (1 / 2), height ** (1 / 2)))
+        if func == "gaussian":
+            grid = gaussian(mesh, mean=(center_x, center_y), std=(width ** (1 / 2), height ** (1 / 2)))
+        elif func == "exp":
+            grid = exp_decay(mesh, center=(center_x, center_y), decay_rate=(width ** (1 / 2)))
         sm = np.sum(grid)
         grid /= sm
         grid[center_x, center_y] = 0
