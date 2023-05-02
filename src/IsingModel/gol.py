@@ -129,8 +129,8 @@ if __name__ == '__main__':
     # Example patterns
     matplotlib.use('TkAgg')
     cell = np.array([[-1, 1, -1], [-1, 1, -1], [-1, -1, -1]])
-
-    gol = GameOfIce(50, 50, 25)
+    # FUNCTIONS: exp / gaussian / ...
+    gol = GameOfIce(50, 50, 25, "exp")
     gol.random(0.505)
     # gol.add_block(glider, 10, 10)
     # gol.add_block(glider, 30, 30)
