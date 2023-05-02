@@ -10,6 +10,10 @@ Game of Life example using the simcx framework.
 """
 
 from __future__ import division
+
+import math
+
+import matplotlib
 import simcx
 from scipy import signal
 import numpy as np
@@ -32,13 +36,13 @@ class GameOfLife(simcx.Simulator):
         self.values = np.zeros((self.height, self.width))
 
         # Create grid and perform gaussian function
-        x, y, mesh = create_mesh2d(width, height)
-        grid = gaussian(mesh)
-        sm = np.sum(grid)
-        grid /= sm
 
         # Replace the center to 0
-        center_x, center_y = np.array(grid.shape) // 2
+        center_x, center_y = np.array((width, height)) // 2
+        x, y, mesh = create_mesh2d(width, height, min=0, max=width)
+        grid = gaussian(mesh, mean=(center_x, center_y), std=(width ** (1/2), height ** (1/2)))
+        sm = np.sum(grid)
+        grid /= sm
         grid[center_x, center_y] = 0
 
         # Extract a sub-grid from the modified grid
@@ -52,7 +56,7 @@ class GameOfLife(simcx.Simulator):
         self.dirty = False
 
     def random(self, prob):
-        self.values = np.random.choice((0, 1), (self.height, self.width),
+        self.values = np.random.choice((-1, +1), (self.height, self.width),
                                        p=(1-prob, prob))
         self.dirty = True
 
@@ -66,16 +70,16 @@ class GameOfLife(simcx.Simulator):
         self.dirty = True
 
     def step(self, delta=0):
-        neighbours = signal.convolve2d(self.values, self.neighbourhood,
+        sum_inf_neighbours = signal.convolve2d(self.values, self.neighbourhood,
                                        mode='same', boundary='wrap')
         for y in range(self.height):
             for x in range(self.width):
-                n = neighbours[y, x]
+                n = sum_inf_neighbours[y, x]
                 if n > 0: print(n)
-                if np.random.random() < n:
-                    self.values[y, x] = 1
-                else:
-                    self.values[y, x] = 0
+                if np.random.random() < n and n > 0:
+                    self.values[y, x] = +1
+                elif -np.random.random() > n:
+                    self.values[y, x] = -1
 
         self.dirty = True
 
@@ -125,15 +129,19 @@ class Grid2D(simcx.Visual):
 
 if __name__ == '__main__':
     # Example patterns
-    glider = np.array([[1, 1, 0], [0, 1, 0], [1, 0, 1]])
+    matplotlib.use('TkAgg')
+    cell = np.array([[-1, 1, -1], [-1, 1, -1], [-1, -1, -1]])
 
-    gol = GameOfLife(50, 50, 1)
-    #gol.random(0.2)
-    gol.add_block(glider, 10, 10)
-    gol.add_block(glider, 30, 30)
+    gol = GameOfLife(50, 50, 25)
+    gol.random(0.505)
+    #gol.add_block(glider, 10, 10)
+    #gol.add_block(glider, 30, 30)
+
+    #gol.add_block(glider, 10, 10)
+    #gol.add_block(glider, 5, 5)
     vis = Grid2D(gol, 10)
 
-    display = simcx.Display(interval=0.1)
+    display = simcx.Display(interval=0.025)
     display.add_simulator(gol)
     display.add_visual(vis)
     simcx.run()
