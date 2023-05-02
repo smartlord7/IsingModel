@@ -71,7 +71,7 @@ class GameOfLife(simcx.Simulator):
         for y in range(self.height):
             for x in range(self.width):
                 n = neighbours[y, x]
-                if n > 0: print(n)
+                # if n > 0: print(n)
                 if np.random.random() < n:
                     self.values[y, x] = 1
                 else:
