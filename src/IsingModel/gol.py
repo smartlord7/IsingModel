@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-# -----------------------------------------------------------------------------
-# Copyright (c) 2015-2016 Tiago Baptista
-# All rights reserved.
-# -----------------------------------------------------------------------------
+# -*- coding: utf-8 -*- ----------------------------------------------------------------------------- Copyright (c)
+# 2022-2023 David Ressurreição & Sancho Simões (based on the original GameOfLife from 2015-2016 - Tiago Batista) All
+# rights reserved. -----------------------------------------------------------------------------
 
 """
 Game of Life example using the simcx framework.
@@ -11,26 +9,22 @@ Game of Life example using the simcx framework.
 
 from __future__ import division
 
-import math
-
-import matplotlib
 import simcx
-from scipy import signal
-import numpy as np
 import pyglet
-from distribution_functions import *
+import matplotlib
+from scipy import signal
 from graphic_util import *
+from distribution_functions import *
 
 __docformat__ = 'restructuredtext'
-__author__ = 'Tiago Baptista'
+__author__ = 'David Ressurreição & Sancho Simões (based on the original GameOfLife - Tiago Batista)'
 
 
-class GameOfLife(simcx.Simulator):
+class GameOfIce(simcx.Simulator):
     """A Game of Life simulator."""
 
     def __init__(self, width=50, height=50, neighbour_size=1):
-        super(GameOfLife, self).__init__()
-        neighbour_init = np.array([[1., 1., 1.], [1., 0., 1.], [1., 1., 1.]])
+        super(GameOfIce, self).__init__()
         self.width = width
         self.height = height
         self.values = np.zeros((self.height, self.width))
@@ -40,7 +34,7 @@ class GameOfLife(simcx.Simulator):
         # Replace the center to 0
         center_x, center_y = np.array((width, height)) // 2
         x, y, mesh = create_mesh2d(width, height, min=0, max=width)
-        grid = gaussian(mesh, mean=(center_x, center_y), std=(width ** (1/2), height ** (1/2)))
+        grid = gaussian(mesh, mean=(center_x, center_y), std=(width ** (1 / 2), height ** (1 / 2)))
         sm = np.sum(grid)
         grid /= sm
         grid[center_x, center_y] = 0
@@ -48,7 +42,8 @@ class GameOfLife(simcx.Simulator):
         # Extract a sub-grid from the modified grid
         sub_grid_size = (neighbour_size, neighbour_size)  # set the desired size of the sub-grid
         sub_grid_x, sub_grid_y = sub_grid_size[0], sub_grid_size[1]
-        neighbour_init = grid[center_x-sub_grid_x:center_x+sub_grid_x+1, center_y-sub_grid_y:center_y+sub_grid_y+1]
+        neighbour_init = grid[center_x - sub_grid_x:center_x + sub_grid_x + 1,
+                         center_y - sub_grid_y:center_y + sub_grid_y + 1]
 
         print(neighbour_init)
 
@@ -57,7 +52,7 @@ class GameOfLife(simcx.Simulator):
 
     def random(self, prob):
         self.values = np.random.choice((-1, +1), (self.height, self.width),
-                                       p=(1-prob, prob))
+                                       p=(1 - prob, prob))
         self.dirty = True
 
     def add_block(self, block, pos_x, pos_y):
@@ -71,7 +66,7 @@ class GameOfLife(simcx.Simulator):
 
     def step(self, delta=0):
         sum_inf_neighbours = signal.convolve2d(self.values, self.neighbourhood,
-                                       mode='same', boundary='wrap')
+                                               mode='same', boundary='wrap')
         for y in range(self.height):
             for x in range(self.width):
                 n = sum_inf_neighbours[y, x]
@@ -102,15 +97,15 @@ class Grid2D(simcx.Visual):
             self._grid.append([])
             for x in range(self._grid_width):
                 vertex_list = self._batch.add(4, pyglet.gl.GL_QUADS, None,
-                                             ('v2i',
-                                              (x * cell_size, y * cell_size,
-                                               x * cell_size + cell_size,
-                                               y * cell_size,
-                                               x * cell_size + cell_size,
-                                               y * cell_size + cell_size,
-                                               x * cell_size,
-                                               y * cell_size + cell_size)),
-                                             ('c3B', self.QUAD_BLACK))
+                                              ('v2i',
+                                               (x * cell_size, y * cell_size,
+                                                x * cell_size + cell_size,
+                                                y * cell_size,
+                                                x * cell_size + cell_size,
+                                                y * cell_size + cell_size,
+                                                x * cell_size,
+                                                y * cell_size + cell_size)),
+                                              ('c3B', self.QUAD_BLACK))
                 self._grid[y].append(vertex_list)
 
     def draw(self):
@@ -132,13 +127,13 @@ if __name__ == '__main__':
     matplotlib.use('TkAgg')
     cell = np.array([[-1, 1, -1], [-1, 1, -1], [-1, -1, -1]])
 
-    gol = GameOfLife(50, 50, 25)
+    gol = GameOfIce(50, 50, 25)
     gol.random(0.505)
-    #gol.add_block(glider, 10, 10)
-    #gol.add_block(glider, 30, 30)
+    # gol.add_block(glider, 10, 10)
+    # gol.add_block(glider, 30, 30)
 
-    #gol.add_block(glider, 10, 10)
-    #gol.add_block(glider, 5, 5)
+    # gol.add_block(glider, 10, 10)
+    # gol.add_block(glider, 5, 5)
     vis = Grid2D(gol, 10)
 
     display = simcx.Display(interval=0.025)
