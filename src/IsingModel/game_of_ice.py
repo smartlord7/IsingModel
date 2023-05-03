@@ -23,7 +23,7 @@ __author__ = 'David Ressurreição & Sancho Simões (based on the original GameO
 class GameOfIce(simcx.Simulator):
     """A Game of Life simulator."""
 
-    def __init__(self, width=50, height=50, neighbour_size=1, func="gaussian"):
+    def __init__(self, width=50, height=50, neighbour_size=1, func="gaussian", func_config: dict = None):
         super(GameOfIce, self).__init__()
         self.width = width
         self.height = height
@@ -35,12 +35,21 @@ class GameOfIce(simcx.Simulator):
         center_x, center_y = np.array((width, height)) // 2
         x, y, mesh = create_mesh2d(width, height, min=0, max=width)
         if func == "gaussian":
-            grid = gaussian(mesh, mean=(center_x, center_y), std=(width ** (1 / 2), height ** (1 / 2)))
+            std = (width ** (1 / 2), height ** (1 / 2))
+            if func_config is not None:
+                std = func_config['std']
+            grid = gaussian(mesh, mean=(center_x, center_y), std=std)
         elif func == "exp":
-            grid = exp_decay(mesh, center=(center_x, center_y), decay_rate=(width ** (1 / 2)))
-        sm = np.sum(grid)
+            decay_rate = (((height + width) / 2) ** (1 / 2))
+            if func_config is not None:
+                decay_rate = func_config['decay_rate']
+            grid = exp_decay(mesh, center=(center_x, center_y), decay_rate=decay_rate)
+
+        center_value = grid[center_x, center_y] # get the value of the center cell
+        grid += center_value / (width * height - 1) # increase equally to the remaining cells
+        grid[center_x, center_y] = 0 # reset the center cell
+        sm = np.sum(grid) # normalize so that the sum is ~ 1
         grid /= sm
-        grid[center_x, center_y] = 0
 
         # Extract a sub-grid from the modified grid
         sub_grid_size = (neighbour_size, neighbour_size)  # set the desired size of the sub-grid
