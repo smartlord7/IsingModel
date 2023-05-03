@@ -78,7 +78,7 @@ class GameOfIce(simcx.Simulator):
 
     def step(self, delta=0):
         sum_inf_neighbours = signal.convolve2d(self.values, self.neighbourhood,
-                                               mode='same', boundary='wrap')
+                                               mode='same', boundary='fill', fillvalue=-1)
         for y in range(self.height):
             for x in range(self.width):
                 n = sum_inf_neighbours[y, x]
