@@ -28,6 +28,7 @@ class GameOfIce(simcx.Simulator):
         self.width = width
         self.height = height
         self.values = np.zeros((self.height, self.width))
+        self.sum_inf_neighbours = np.zeros((self.height, self.width))
 
         # Create grid and perform gaussian function
 
@@ -46,7 +47,7 @@ class GameOfIce(simcx.Simulator):
             grid = exp_decay(mesh, center=(center_x, center_y), decay_rate=decay_rate)
 
         center_value = grid[center_x, center_y] # get the value of the center cell
-        grid += center_value / (width * height - 1) # increase equally to the remaining cells
+        #grid += center_value / (width * height - 1) # increase equally to the remaining cells
         grid[center_x, center_y] = 0 # reset the center cell
         sm = np.sum(grid) # normalize so that the sum is ~ 1
         grid /= sm
@@ -77,11 +78,11 @@ class GameOfIce(simcx.Simulator):
         self.dirty = True
 
     def step(self, delta=0):
-        sum_inf_neighbours = signal.convolve2d(self.values, self.neighbourhood,
-                                               mode='same', boundary='fill', fillvalue=-1)
+        self.sum_inf_neighbours = signal.convolve2d(self.values, self.neighbourhood,
+                                               mode='same', boundary='wrap')
         for y in range(self.height):
             for x in range(self.width):
-                n = sum_inf_neighbours[y, x]
+                n = self.sum_inf_neighbours[y, x]
                 if n > 0: print(n)
                 if np.random.random() < n and n > 0:
                     self.values[y, x] = +1
@@ -133,22 +134,3 @@ class Grid2D(simcx.Visual):
                 else:
                     self._grid[y][x].colors[:] = self.QUAD_BLACK
 
-
-if __name__ == '__main__':
-    # Example patterns
-    matplotlib.use('TkAgg')
-    cell = np.array([[-1, 1, -1], [-1, 1, -1], [-1, -1, -1]])
-    # FUNCTIONS: exp / gaussian / ...
-    gol = GameOfIce(50, 50, 25, "exp")
-    gol.random(0.505)
-    # gol.add_block(glider, 10, 10)
-    # gol.add_block(glider, 30, 30)
-
-    # gol.add_block(glider, 10, 10)
-    # gol.add_block(glider, 5, 5)
-    vis = Grid2D(gol, 10)
-
-    display = simcx.Display(interval=0.025)
-    display.add_simulator(gol)
-    display.add_visual(vis)
-    simcx.run()
