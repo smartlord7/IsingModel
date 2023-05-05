@@ -13,3 +13,6 @@ class InfluencesPlot(simcx.MplVisual):
     def draw(self):
         self.im_data.set_data(self.sim.sum_inf_neighbours)
         self.im_data.make_image(None)
+
+
+

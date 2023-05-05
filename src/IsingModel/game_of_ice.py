@@ -9,7 +9,6 @@ Game of Life example using the simcx framework.
 
 from __future__ import division
 
-import matplotlib.pyplot as plt
 import simcx
 import pyglet
 import matplotlib
@@ -42,8 +41,6 @@ class GameOfIce(simcx.Simulator):
                 std = func_config['std']
             grid = gaussian(mesh, mean=(center_x, center_y), std=std)
         elif func == "exp":
-            grid = exp_decay(mesh, center=(center_x, center_y), decay_rate=5)
-            sm = np.sum(grid)
             decay_rate = (((height + width) / 2) ** (1 / 2))
             if func_config is not None:
                 decay_rate = func_config['decay_rate']
@@ -61,7 +58,7 @@ class GameOfIce(simcx.Simulator):
         neighbour_init = grid[center_x - sub_grid_x:center_x + sub_grid_x + 1,
                          center_y - sub_grid_y:center_y + sub_grid_y + 1]
 
-        print(neighbour_init)
+        # print(neighbour_init)
 
         self.neighbourhood = neighbour_init
         self.dirty = False
@@ -82,11 +79,11 @@ class GameOfIce(simcx.Simulator):
 
     def step(self, delta=0):
         self.sum_inf_neighbours = signal.convolve2d(self.values, self.neighbourhood,
-                                               mode='same', boundary='wrap')
+                                               mode='same', boundary='fill', fillvalue=0)
         for y in range(self.height):
             for x in range(self.width):
                 n = self.sum_inf_neighbours[y, x]
-                if n > 0: print(n)
+                # if n > 0: print(n)
                 if np.random.random() < n and n > 0:
                     self.values[y, x] = +1
                 elif -np.random.random() > n:
@@ -137,25 +134,3 @@ class Grid2D(simcx.Visual):
                 else:
                     self._grid[y][x].colors[:] = self.QUAD_BLACK
 
-
-if __name__ == '__main__':
-    # Example patterns
-    matplotlib.use('TkAgg')
-    cell = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]])
-    # Define a 5x5 array of ones
-    ones = np.ones((5, 5))
-
-    # Use Kronecker product to create a 25x25 cell of ones
-    big_cell = np.kron(cell, ones)
-
-    # FUNCTIONS: exp / gaussian / ...
-    gol = GameOfIce(50, 50, 25, "gaussian")
-    gol.random(0.5)
-    # gol.add_block(big_cell, 30, 30)
-
-    vis = Grid2D(gol, 10)
-
-    display = simcx.Display(interval=0.025)
-    display.add_simulator(gol)
-    display.add_visual(vis)
-    simcx.run()
