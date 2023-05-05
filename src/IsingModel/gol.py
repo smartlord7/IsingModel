@@ -9,6 +9,7 @@ Game of Life example using the simcx framework.
 
 from __future__ import division
 
+import matplotlib.pyplot as plt
 import simcx
 import pyglet
 import matplotlib
@@ -37,7 +38,7 @@ class GameOfIce(simcx.Simulator):
         if func == "gaussian":
             grid = gaussian(mesh, mean=(center_x, center_y), std=(width ** (1 / 2), height ** (1 / 2)))
         elif func == "exp":
-            grid = exp_decay(mesh, center=(center_x, center_y), decay_rate=(width ** (1 / 2)))
+            grid = exp_decay(mesh, center=(center_x, center_y), decay_rate=5)
         sm = np.sum(grid)
         grid /= sm
         grid[center_x, center_y] = 0
@@ -128,15 +129,18 @@ class Grid2D(simcx.Visual):
 if __name__ == '__main__':
     # Example patterns
     matplotlib.use('TkAgg')
-    cell = np.array([[-1, 1, -1], [-1, 1, -1], [-1, -1, -1]])
-    # FUNCTIONS: exp / gaussian / ...
-    gol = GameOfIce(50, 50, 25, "exp")
-    gol.random(0.505)
-    # gol.add_block(glider, 10, 10)
-    # gol.add_block(glider, 30, 30)
+    cell = np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]])
+    # Define a 5x5 array of ones
+    ones = np.ones((5, 5))
 
-    # gol.add_block(glider, 10, 10)
-    # gol.add_block(glider, 5, 5)
+    # Use Kronecker product to create a 25x25 cell of ones
+    big_cell = np.kron(cell, ones)
+
+    # FUNCTIONS: exp / gaussian / ...
+    gol = GameOfIce(50, 50, 25, "gaussian")
+    gol.random(0.5)
+    # gol.add_block(big_cell, 30, 30)
+
     vis = Grid2D(gol, 10)
 
     display = simcx.Display(interval=0.025)
