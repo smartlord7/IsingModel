@@ -2,10 +2,10 @@
 # 2022-2023 David Ressurreição & Sancho Simões (based on the original GameOfLife from 2015-2016 - Tiago Batista) All
 # rights reserved. -----------------------------------------------------------------------------
 
-"""
+'''
 Game of Life example using the simcx framework.
 
-"""
+'''
 
 from __future__ import division
 
@@ -21,39 +21,49 @@ __author__ = 'David Ressurreição & Sancho Simões (based on the original GameO
 
 
 class GameOfIce(simcx.Simulator):
-    """A Game of Life simulator."""
+    '''A Game of Life simulator.'''
 
-    def __init__(self, width=50, height=50, neighbour_size=1, func="gaussian", func_config: dict = None):
+    def __init__(self,
+                 width: int = 50,
+                 height: int = 50,
+                 neighbour_size: int = 1,
+                 func: str = 'gaussian',
+                 func_config: dict = None,
+                 boundary: str = 'fill',
+                 fill: int = 0):
         super(GameOfIce, self).__init__()
+
         self.width = width
         self.height = height
         self.values = np.zeros((self.height, self.width))
+        self.boundary = boundary
+        self.fill = fill
         self.sum_inf_neighbours = np.zeros((self.height, self.width))
 
         # Create grid and perform gaussian function
 
         # Replace the center to 0
-        center_x, center_y = np.array((width, height)) // 2
+        center_x, center_y = np.array((height, width)) // 2
         x, y, mesh = create_mesh2d(width, height, min=0, max=width)
-        if func == "gaussian":
+        if func == 'gaussian':
             std = (width ** (1 / 2), height ** (1 / 2))
             if func_config is not None:
                 std = func_config['std']
             grid = gaussian(mesh, mean=(center_x, center_y), std=std)
-            #grid += center_value / (width * height - 1) # increase equally to the remaining cells
-            grid[center_x, center_y] = 0 # reset the center cell
-            sm = np.sum(grid) # normalize so that the sum is ~ 1
+            # grid += center_value / (width * height - 1) # increase equally to the remaining cells
+            grid[center_x, center_y] = 0  # reset the center cell
+            sm = np.sum(grid)  # normalize so that the sum is ~ 1
             grid /= sm
-        elif func == "exp":
+        elif func == 'exp_decay':
             decay_rate = (((height + width) / 2) ** (1 / 2))
             if func_config is not None:
                 decay_rate = func_config['decay_rate']
             grid = exp_decay(mesh, center=(center_x, center_y), decay_rate=decay_rate)
-            #grid += center_value / (width * height - 1) # increase equally to the remaining cells
-            grid[center_x, center_y] = 0 # reset the center cell
-            sm = np.sum(grid) # normalize so that the sum is ~ 1
+            # grid += center_value / (width * height - 1) # increase equally to the remaining cells
+            grid[center_x, center_y] = 0  # reset the center cell
+            sm = np.sum(grid)  # normalize so that the sum is ~ 1
             grid /= sm
-        elif func == "normal":
+        elif func == 'normal':
             grid = np.ones((height, width))
             grid[center_x, center_y] = 0 # reset the center cell
         elif func == "rayleigh":
@@ -94,7 +104,7 @@ class GameOfIce(simcx.Simulator):
 
     def step(self, delta=0):
         self.sum_inf_neighbours = signal.convolve2d(self.values, self.neighbourhood,
-                                               mode='same', boundary='fill', fillvalue=0)
+                                                    mode='same', boundary=self.boundary, fillvalue=self.fill)
         for y in range(self.height):
             for x in range(self.width):
                 n = self.sum_inf_neighbours[y, x]
@@ -148,4 +158,3 @@ class Grid2D(simcx.Visual):
                     self._grid[y][x].colors[:] = self.QUAD_WHITE
                 else:
                     self._grid[y][x].colors[:] = self.QUAD_BLACK
-
