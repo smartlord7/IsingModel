@@ -21,20 +21,42 @@ __author__ = 'David Ressurreição & Sancho Simões (based on the original GameO
 
 
 class GameOfIce(simcx.Simulator):
-    '''A Game of Life simulator.'''
+    '''A Game of Ice simulator.'''
+
+    DEFAULT_WIDTH = 50
+    DEFAULT_HEIGHT = 50
+    DEFAULT_NEIGHBOUR_SIZE = 1
+    DEFAULT_METHOD = 'global'
+    DEFAULT_DIST_FUNC = 'gaussian'
+    DEFAULT_BOUNDARY = 'fill'
+    DEFAULT_FILL = 0
+    DEFAULT_INITIAL_TEMPERATURE = 1.0
+    DEFAULT_COUPLING_CONSTANT = 1.0
+    DEFAULT_N_TEMPERATURE_DECAY_STEPS = 100
 
     def __init__(self,
-                 width: int = 50,
-                 height: int = 50,
-                 neighbour_size: int = 1,
-                 func: str = 'gaussian',
+
+                 width: int = DEFAULT_WIDTH,
+                 height: int = DEFAULT_HEIGHT,
+                 neighbourhood_size: int = DEFAULT_NEIGHBOUR_SIZE,
+                 method: str = 'global',
+                 initial_temperature: float = DEFAULT_INITIAL_TEMPERATURE,
+                 n_temperature_decay_steps: int = DEFAULT_N_TEMPERATURE_DECAY_STEPS, # as if
+                 coupling_constant: float = DEFAULT_COUPLING_CONSTANT,
+                 dist_func: str = DEFAULT_DIST_FUNC,
                  func_config: dict = None,
                  boundary: str = 'fill',
-                 fill: int = 0):
+                 fill: int = DEFAULT_FILL):
         super(GameOfIce, self).__init__()
 
         self.width = width
         self.height = height
+        self.neighbourhood_size = neighbourhood_size
+        self.method = method
+        self.temperature = initial_temperature
+        self.n_temperature_decay_steps = n_temperature_decay_steps
+        self.temperature_decay_step = self.temperature / self.n_temperature_decay_steps
+        self.coupling_constant = coupling_constant
         self.values = np.zeros((self.height, self.width))
         self.boundary = boundary
         self.fill = fill
@@ -46,7 +68,7 @@ class GameOfIce(simcx.Simulator):
         center_x, center_y = np.array((height, width)) // 2
         x, y, mesh = create_mesh2d(width, height, min=0, max=width)
 
-        if func == 'gaussian':
+        if dist_func == 'gaussian':
             std = (width ** (1 / 2), height ** (1 / 2))
 
             if func_config is not None:
@@ -54,7 +76,7 @@ class GameOfIce(simcx.Simulator):
 
             grid = gaussian(mesh, mean=(center_x, center_y), std=std)
             # grid += center_value / (width * height - 1) # increase equally to the remaining cells
-        elif func == 'exp_decay':
+        elif dist_func == 'exp_decay':
             decay_rate = (((height + width) / 2) ** (1 / 2))
 
             if func_config is not None:
@@ -62,19 +84,19 @@ class GameOfIce(simcx.Simulator):
 
             grid = exp_decay(mesh, center=(center_x, center_y), decay_rate=decay_rate)
             # grid += center_value / (width * height - 1) # increase equally to the remaining cells
-        elif func == 'normal':
+        elif dist_func == 'normal':
             grid = np.ones((height, width))
-        elif func == "rayleigh":
+        elif dist_func == "rayleigh":
             grid = rayleigh(mesh, center=(center_x, center_y), sigma=5.0)
-        elif func == "lognormal":
-            grid = lognormal_distribution(mesh, center=(center_x, center_y), sigma=1.0, mu=0.0)
+        elif dist_func == "log_normal":
+            grid = log_normal_distribution(mesh, center=(center_x, center_y), sigma=1.0, mu=0.0)
 
         grid[center_x, center_y] = 0  # reset the center cell
         sm = np.sum(grid)  # normalize so that the sum is ~ 1
         grid /= sm
 
         # Extract a sub-grid from the modified grid
-        sub_grid_size = (neighbour_size, neighbour_size)  # set the desired size of the sub-grid
+        sub_grid_size = (neighbourhood_size, neighbourhood_size)  # set the desired size of the sub-grid
         sub_grid_x, sub_grid_y = sub_grid_size[0], sub_grid_size[1]
         neighbour_init = grid[center_x - sub_grid_x:center_x + sub_grid_x + 1,
                          center_y - sub_grid_y:center_y + sub_grid_y + 1]
@@ -83,6 +105,20 @@ class GameOfIce(simcx.Simulator):
 
         self.neighbourhood = neighbour_init
         self.dirty = False
+
+    def local_field(self, i, j):
+        top = self.values[(i - 1) % self.height, j]
+        bottom = self.values[(i + 1) % self.height, j]
+        left = self.values[i, (j - 1) % self.width]
+        right = self.values[i, (j + 1) % self.width]
+
+        return self.coupling_constant * (top + bottom + left + right)
+
+    def local_prob_switch(self, i, j):
+        t = self.temperature
+        e = -self.local_field(i, j) * self.values[i, j]
+
+        return np.exp(-e / t) / (np.exp(-e / t) + np.exp(e / t)) # boltzmann distribution
 
     def random(self, prob):
         self.values = np.random.choice((-1, +1), (self.height, self.width),
@@ -99,16 +135,26 @@ class GameOfIce(simcx.Simulator):
         self.dirty = True
 
     def step(self, delta=0):
-        self.sum_inf_neighbours = signal.convolve2d(self.values, self.neighbourhood,
-                                                    mode='same', boundary=self.boundary, fillvalue=self.fill)
+        if self.temperature - self.temperature_decay_step > 0: # linear temperature annealing
+            self.temperature -= self.temperature_decay_step
+        print(self.temperature)
+
+        if self.method == 'global':
+            self.sum_inf_neighbours = signal.convolve2d(self.values, self.neighbourhood,
+                                                        mode='same', boundary=self.boundary, fillvalue=self.fill)
         for y in range(self.height):
             for x in range(self.width):
-                n = self.sum_inf_neighbours[y, x]
-                # if n > 0: print(n)
-                if np.random.random() < n and n > 0:
-                    self.values[y, x] = +1
-                elif -np.random.random() > n:
-                    self.values[y, x] = -1
+                if self.method == 'global':
+                    n = self.sum_inf_neighbours[y, x]
+                    # if n > 0: print(n)
+                    if np.random.random() < n and n > 0:
+                        self.values[y, x] = +1
+                    elif -np.random.random() > n:
+                        self.values[y, x] = -1
+                elif self.method == 'local':
+                    p = self.local_prob_switch(y, x)
+                    if np.random.rand() < p:
+                        self.values[y, x] = -self.values[y, x]
 
         self.dirty = True
 
