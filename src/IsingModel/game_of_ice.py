@@ -11,7 +11,7 @@ from __future__ import division
 
 import simcx
 import pyglet
-import matplotlib
+from pyglet import window
 from scipy import signal
 from graphic_util import *
 from distribution_functions import *
@@ -45,37 +45,33 @@ class GameOfIce(simcx.Simulator):
         # Replace the center to 0
         center_x, center_y = np.array((height, width)) // 2
         x, y, mesh = create_mesh2d(width, height, min=0, max=width)
+
         if func == 'gaussian':
             std = (width ** (1 / 2), height ** (1 / 2))
+
             if func_config is not None:
                 std = func_config['std']
+
             grid = gaussian(mesh, mean=(center_x, center_y), std=std)
             # grid += center_value / (width * height - 1) # increase equally to the remaining cells
-            grid[center_x, center_y] = 0  # reset the center cell
-            sm = np.sum(grid)  # normalize so that the sum is ~ 1
-            grid /= sm
         elif func == 'exp_decay':
             decay_rate = (((height + width) / 2) ** (1 / 2))
+
             if func_config is not None:
                 decay_rate = func_config['decay_rate']
+
             grid = exp_decay(mesh, center=(center_x, center_y), decay_rate=decay_rate)
             # grid += center_value / (width * height - 1) # increase equally to the remaining cells
-            grid[center_x, center_y] = 0  # reset the center cell
-            sm = np.sum(grid)  # normalize so that the sum is ~ 1
-            grid /= sm
         elif func == 'normal':
             grid = np.ones((height, width))
-            grid[center_x, center_y] = 0 # reset the center cell
         elif func == "rayleigh":
             grid = rayleigh(mesh, center=(center_x, center_y), sigma=5.0)
-            grid[center_x, center_y] = 0 # reset the center cell
-            sm = np.sum(grid) # normalize so that the sum is ~ 1
-            grid /= sm
         elif func == "lognormal":
             grid = lognormal_distribution(mesh, center=(center_x, center_y), sigma=1.0, mu=0.0)
-            grid[center_x, center_y] = 0 # reset the center cell
-            sm = np.sum(grid) # normalize so that the sum is ~ 1
-            grid /= sm
+
+        grid[center_x, center_y] = 0  # reset the center cell
+        sm = np.sum(grid)  # normalize so that the sum is ~ 1
+        grid /= sm
 
         # Extract a sub-grid from the modified grid
         sub_grid_size = (neighbour_size, neighbour_size)  # set the desired size of the sub-grid
@@ -131,6 +127,7 @@ class Grid2D(simcx.Visual):
         # create graphics objects
         self._batch = pyglet.graphics.Batch()
         self._grid = []
+
         for y in range(self._grid_height):
             self._grid.append([])
             for x in range(self._grid_width):
