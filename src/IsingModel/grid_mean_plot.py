@@ -12,13 +12,13 @@ class GridMeanPlot(simcx.MplVisual):
         width = self.sim.width
         height = self.sim.height
         self.n_grid = width*height
-        self.y = [sum(sum(self.sim.sum_inf_neighbours))/self.n_grid]
+        mean_grid = sum(sum(self.sim.sum_inf_neighbours))/self.n_grid
+        self.y = [mean_grid]
 
         self.ax = self.figure.add_subplot(111)
         self.ax.set_xlabel('Time')
         self.ax.set_ylabel('Mean')
         self.ax.set_xlim(0, 100)
-        self.ax.set_ylim(-1, 1)
         self._max_time = 100
         self.im_data, = self.ax.plot(self.x, self.y)
 
@@ -27,9 +27,11 @@ class GridMeanPlot(simcx.MplVisual):
     def draw(self):
 
         self.x.append(self.x[-1] + 1)
-        self.y.append(sum(sum(self.sim.sum_inf_neighbours))/self.n_grid)
+        mean_grid = sum(sum(self.sim.sum_inf_neighbours))/self.n_grid
+        self.y.append(mean_grid)
         if self.x[-1] > self._max_time:
             self._max_time += 50
             self.ax.set_xlim(0, self._max_time)
+        self.ax.set_ylim(min(self.y)-5, max(self.y)+5)
 
         self.im_data.set_data(self.x, self.y)

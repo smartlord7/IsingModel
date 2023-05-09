@@ -12,7 +12,7 @@ def main():
     func_config = {
         'decay_rate': 4
     }
-    goi = GameOfIce(50, 50, 25, "exp", func_config)
+    goi = GameOfIce(50, 50, 50, "normal", func_config)
     goi.random(0.5)
 
     vis = Grid2D(goi, 10)

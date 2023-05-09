@@ -40,17 +40,23 @@ class GameOfIce(simcx.Simulator):
             if func_config is not None:
                 std = func_config['std']
             grid = gaussian(mesh, mean=(center_x, center_y), std=std)
+            #grid += center_value / (width * height - 1) # increase equally to the remaining cells
+            grid[center_x, center_y] = 0 # reset the center cell
+            sm = np.sum(grid) # normalize so that the sum is ~ 1
+            grid /= sm
         elif func == "exp":
             decay_rate = (((height + width) / 2) ** (1 / 2))
             if func_config is not None:
                 decay_rate = func_config['decay_rate']
             grid = exp_decay(mesh, center=(center_x, center_y), decay_rate=decay_rate)
+            #grid += center_value / (width * height - 1) # increase equally to the remaining cells
+            grid[center_x, center_y] = 0 # reset the center cell
+            sm = np.sum(grid) # normalize so that the sum is ~ 1
+            grid /= sm
+        elif func == "normal":
+            grid = np.ones((height, width))
+            grid[center_x, center_y] = 0 # reset the center cell
 
-        center_value = grid[center_x, center_y] # get the value of the center cell
-        #grid += center_value / (width * height - 1) # increase equally to the remaining cells
-        grid[center_x, center_y] = 0 # reset the center cell
-        sm = np.sum(grid) # normalize so that the sum is ~ 1
-        grid /= sm
 
         # Extract a sub-grid from the modified grid
         sub_grid_size = (neighbour_size, neighbour_size)  # set the desired size of the sub-grid
