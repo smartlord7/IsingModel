@@ -56,7 +56,16 @@ class GameOfIce(simcx.Simulator):
         elif func == "normal":
             grid = np.ones((height, width))
             grid[center_x, center_y] = 0 # reset the center cell
-
+        elif func == "rayleigh":
+            grid = rayleigh(mesh, center=(center_x, center_y), sigma=5.0)
+            grid[center_x, center_y] = 0 # reset the center cell
+            sm = np.sum(grid) # normalize so that the sum is ~ 1
+            grid /= sm
+        elif func == "lognormal":
+            grid = lognormal_distribution(mesh, center=(center_x, center_y), sigma=1.0, mu=0.0)
+            grid[center_x, center_y] = 0 # reset the center cell
+            sm = np.sum(grid) # normalize so that the sum is ~ 1
+            grid /= sm
 
         # Extract a sub-grid from the modified grid
         sub_grid_size = (neighbour_size, neighbour_size)  # set the desired size of the sub-grid

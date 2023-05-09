@@ -32,6 +32,6 @@ class GridMeanPlot(simcx.MplVisual):
         if self.x[-1] > self._max_time:
             self._max_time += 50
             self.ax.set_xlim(0, self._max_time)
-        self.ax.set_ylim(min(self.y)-5, max(self.y)+5)
+        self.ax.set_ylim(min(self.y)-1, max(self.y)+1)
 
         self.im_data.set_data(self.x, self.y)
