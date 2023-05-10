@@ -87,9 +87,12 @@ class GameOfIce(simcx.Simulator):
         self.perturbation_function = perturbation_function
         self.temperature_decay_step = self.temperature / self.n_temperature_decay_steps
         self.coupling_constant = coupling_constant
+        self.dist_func = dist_func
         self.values = np.zeros((self.height, self.width))
         self.boundary = boundary
         self.fill = fill
+
+        self.step_counter = 0
         self.sum_inf_neighbours = np.zeros((self.height, self.width))
         self.initial_values = np.zeros((self.height, self.width))
 
@@ -235,6 +238,7 @@ class GameOfIce(simcx.Simulator):
             self.values[mask] = -self.values[mask]
 
         self.dirty = True
+        self.step_counter += 1
 
     def perturbate(self,
                    x: int,

@@ -20,10 +20,10 @@ def main():
     # Set the probability of generating a spin up
     PROB_GENERATION = 0.5
     # Set the size of the cells in the visualization
-    CELL_SIZE = 10
+    CELL_SIZE = 3
     # Set the size of the stats plot
     GRID_STATS_PLOT_WIDTH = GRID_WIDTH_CELLS * CELL_SIZE
-    GRID_STATS_PLOT_HEIGHT = 200
+    GRID_STATS_PLOT_HEIGHT = 600
 
     # Create a GameOfIce instance with the specified parameters
     goi = GameOfIce(width=GRID_WIDTH_CELLS,
@@ -48,6 +48,8 @@ def main():
 
     # Create a CustomDisplay instance to display the simulation
     display = CustomDisplay(goi,
+                            vis,
+                            'screenshot',
                             x_min=0,
                             x_max=CELL_SIZE * GRID_WIDTH_CELLS,
                             y_min=GRID_STATS_PLOT_HEIGHT,

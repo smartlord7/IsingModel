@@ -17,6 +17,7 @@ class CustomDisplay(Display):
     def __init__(self,
                  sim: GameOfIce,
                  grid: Grid2D,
+                 screenshot_name: str,
                  x_min: int,
                  x_max: int,
                  y_min: int,
@@ -57,6 +58,8 @@ class CustomDisplay(Display):
         """
         super().__init__(width, height, interval, multi_sampling, **kwargs)
 
+        self.screenshot_counter = 0
+        self.screenshot_path = screenshot_name
         self.sim = sim
         self.grid = grid
         self.x_min = x_min
@@ -122,6 +125,13 @@ class CustomDisplay(Display):
         elif symbol == pyglet.window.key.R:
             self.sim.values = self.initial_values
             self.grid.draw()
+        elif symbol == pyglet.window.key.P:
+            # Get the color buffer of the window
+            buffer = pyglet.image.get_buffer_manager().get_color_buffer()
+
+            # Save the image to a file
+            buffer.save(self.screenshot_path + str(self.screenshot_counter) + '.png')
+            self.screenshot_counter += 1
 
     def on_mouse_release(self, x, y, button, modifiers):
         """
