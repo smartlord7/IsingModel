@@ -56,7 +56,7 @@ class StatsPlot(simcx.MplVisual):
         if sim.method == 'global':
             self.line1, = self.ax1.plot(self.x, self.y1, label='Phase-sensitivity')
         self.line2, = self.ax1.plot(self.x, self.y2, label='Magnetization')
-        self.line4, = self.ax1.plot(self.x, self.y4, label='self.correlation')
+        self.line4, = self.ax1.plot(self.x, self.y4, label='Correlation')
         # self.line3, = self.ax1.plot(self.x, self.y3, label='Influences self.std')
         plt.legend(fontsize='8')
 
