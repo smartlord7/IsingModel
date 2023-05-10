@@ -2,8 +2,14 @@
 
 # Import necessary modules
 from __future__ import division
+
+from typing import Callable, Any
+
+import numpy as np
 import simcx
 from scipy import signal
+
+from perturbations import perturb_circle
 from util.graphic_util import *
 from distribution_functions import *
 
@@ -53,6 +59,7 @@ class GameOfIce(simcx.Simulator):
     DEFAULT_INITIAL_TEMPERATURE = 1.0
     DEFAULT_COUPLING_CONSTANT = 1.0
     DEFAULT_N_TEMPERATURE_DECAY_STEPS = 100
+    DEFAULT_PERTURBATION_FUNCTION = perturb_circle
 
     def __init__(self,
                  width: int = DEFAULT_WIDTH,
@@ -61,6 +68,7 @@ class GameOfIce(simcx.Simulator):
                  method: str = DEFAULT_METHOD,
                  initial_temperature: float = DEFAULT_INITIAL_TEMPERATURE,
                  n_temperature_decay_steps: int = DEFAULT_N_TEMPERATURE_DECAY_STEPS,
+                 perturbation_function: Callable[[np.ndarray, int, int, int, int], Any] = DEFAULT_PERTURBATION_FUNCTION,
                  coupling_constant: float = DEFAULT_COUPLING_CONSTANT,
                  dist_func: str = DEFAULT_DIST_FUNC,
                  func_config: dict = None,
@@ -75,6 +83,7 @@ class GameOfIce(simcx.Simulator):
         self.method = method
         self.temperature = initial_temperature
         self.n_temperature_decay_steps = n_temperature_decay_steps
+        self.perturbation_function = perturbation_function
         self.temperature_decay_step = self.temperature / self.n_temperature_decay_steps
         self.coupling_constant = coupling_constant
         self.values = np.zeros((self.height, self.width))
@@ -223,3 +232,21 @@ class GameOfIce(simcx.Simulator):
             self.values[mask] = -self.values[mask]
 
         self.dirty = True
+
+    def perturbate(self,
+                   x: int,
+                   y: int,
+                   radius: int,
+                   value: int):
+        """
+        Puts a block at the specified coordinates.
+
+        Parameters:
+        -----------
+        x : int
+            The x coordinate of the center of the peeturbation.
+        y : int
+            The y coordinate of the center of the peeturbation.
+        """
+
+        self.perturbation_function(self.values, x, y, radius, value)

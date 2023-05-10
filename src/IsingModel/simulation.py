@@ -12,8 +12,8 @@ def main():
         'decay_rate': 1
     }
     # Set the size of the grid
-    GRID_WIDTH_CELLS = 50
-    GRID_HEIGHT_CELLS = 50
+    GRID_WIDTH_CELLS = 100
+    GRID_HEIGHT_CELLS = 100
     # Set the size of the neighborhood
     NEIGHBOURHOOD_SIZE = 200
     # Set the probability of generating a spin up
@@ -47,7 +47,7 @@ def main():
     display = CustomDisplay(goi,
                             x_min=0,
                             x_max=CELL_SIZE * GRID_WIDTH_CELLS,
-                            y_min=GRID_STATS_PLOT_WIDTH,
+                            y_min=GRID_STATS_PLOT_HEIGHT,
                             y_max=GRID_STATS_PLOT_HEIGHT + CELL_SIZE * GRID_HEIGHT_CELLS,
                             cell_size=CELL_SIZE,
                             interval=0.1)

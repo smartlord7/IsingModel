@@ -1,5 +1,10 @@
+from typing import Callable, Any
+
+import numpy as np
+import pyglet
 from simcx import Display
 from game_of_ice import GameOfIce
+from perturbations import perturb_circle
 
 
 class CustomDisplay(Display):
@@ -55,31 +60,28 @@ class CustomDisplay(Display):
         self.y_min = y_min
         self.y_max = y_max
         self.cell_size = cell_size
+        self.perturbation_radius = min(self.sim.width, self.sim.height) // 10
 
-    def put_ice_block(self,
-                      x: int,
-                      y: int,
-                      side: int = None):
-        """
-        Puts an ice block at the specified coordinates.
+    def _convert_to_grid(self, x, y):
+        x = (x - self.x_min) // self.cell_size
+        y = (y - self.y_min) // self.cell_size
 
-        Parameters:
-        -----------
-        x : int
-            The x coordinate of the center of the ice block.
-        y : int
-            The y coordinate of the center of the ice block.
-        side : int, optional
-            The side length of the ice block in cells (default is None).
-        """
-        if side == None:
-            side = int(min(self.sim.height, self.sim.width) / 10)
+        width = self.sim.width
+        height = self.sim.height
 
-        # Calculate the coordinates of the top-left corner of the square
-        start_x = ((x - self.x_min) // self.cell_size) - side // 2
-        start_y = ((y - self.y_min) // self.cell_size) - side // 2
-        # Fill the square with -1
-        self.sim.values[start_x:start_x + side, start_y:start_y + side] = -1
+        if x >= width:
+            x = width - 1
+
+        if y >= height:
+            y = height - 1
+
+        return x, y
+
+    def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
+        if scroll_y > 0:
+            self.perturbation_radius += 1
+        elif scroll_y < 0:
+            self.perturbation_radius -= 1
 
     def on_mouse_press(self, x, y, button, modifiers):
         """
@@ -98,7 +100,14 @@ class CustomDisplay(Display):
         """
         if self.x_min < x < self.x_max and self.y_min < y < self.y_max:
             print(f"Mouse button {button} pressed at ({x}, {y})")
-            self.put_ice_block(x, y)
+            y, x = self._convert_to_grid(x, y)
+            radius = self.perturbation_radius
+
+            if button == pyglet.window.mouse.LEFT:
+                self.sim.perturbate(x, y, radius, +1)
+            elif button == pyglet.window.mouse.RIGHT:
+                self.sim.perturbate(x, y, radius, -1)
+
 
     def on_mouse_release(self, x, y, button, modifiers):
         """
