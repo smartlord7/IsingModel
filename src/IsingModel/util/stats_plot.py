@@ -33,7 +33,7 @@ class StatsPlot(simcx.MplVisual):
         self.y3 = [std_influences]
 
         # Create a subplot with the appropriate labels and limits
-        self.ax1 = self.figure.add_subplot(111)
+        self.ax1 = self.figure.add_subplot(3, 1, 1)
         self.ax1.set_xlabel('Time')
         self.ax1.set_ylabel('Mean')
         self.ax1.set_xlim(0, 100)
@@ -45,6 +45,11 @@ class StatsPlot(simcx.MplVisual):
         self.line2, = self.ax1.plot(self.x, self.y2,  label='States mean')
         # self.line3, = self.ax1.plot(self.x, self.y3, label='Influences std')
         plt.legend()
+
+        self.ax2 = self.figure.add_subplot(2, 1, 2)
+        self.im = self.ax2.imshow(np.transpose(np.rot90(self.sim.sum_inf_neighbours, -1)), cmap='inferno')
+        self.color_bar = self.ax2.figure.colorbar( self.im, ax=self.ax2)
+        self.figure.subplots_adjust(hspace=0.3)
 
         # Update the image
         self.update_image()
@@ -78,10 +83,13 @@ class StatsPlot(simcx.MplVisual):
             min_v = min(self.y2)
             max_v = max(self.y2)
 
-        self.ax1.set_ylim(min_v - 0.01, max_v + 0.01)
+        self.ax1.set_ylim(min_v - 0.03, max_v + 0.03)
 
         # Update the lines of the plot with the new x and y values
         if self.sim.method == 'global':
             self.line1.set_data(self.x, self.y1)
+            self.im.set_data(np.transpose(np.rot90(self.sim.sum_inf_neighbours, -1)))
+            self.im.set_clim(vmin=np.min(self.sim.sum_inf_neighbours), vmax=np.max(self.sim.sum_inf_neighbours))
+            self.ax2.autoscale()
         self.line2.set_data(self.x, self.y2)
         # self.line3.set_data(self.x, self.y3)

@@ -56,7 +56,7 @@ def main():
                             interval=0.1)
     # Add the GameOfIce instance, the Grid2D instance, and the StatsPlot instance to the display
     display.add_simulator(goi)
-    display.add_visual(vis, 0, 200)
+    display.add_visual(vis, 0, GRID_STATS_PLOT_HEIGHT)
     display.add_visual(vis2)
     # Run the simulation using the simcx library
     simcx.run()
