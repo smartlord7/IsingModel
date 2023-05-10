@@ -20,14 +20,15 @@ def main():
     GRID_HEIGHT_CELLS = 100
     curr_time = perf_counter()
     LOG_FILE_PATH = str(curr_time) + 'output.log'
-    LOG_FILE_HEADER = 'neighbourhood,prob_generation,method,coupling_constant,initial_temperature,dist_function,boundary,fill\n'
+    LOG_FILE_HEADER = 'neighbourhood,prob_generation,method,coupling_constant,initial_temperature,dist_function,' \
+                      'boundary,fill,phase_sensitivity,magnetization,correlation,energy,time,observations\n '
 
     # Set the size of the cells in the visualization
-    CELL_SIZE = 2
+    CELL_SIZE = 3
 
     # Set the size of the stats plot
     GRID_STATS_PLOT_WIDTH = GRID_WIDTH_CELLS * CELL_SIZE
-    GRID_STATS_PLOT_HEIGHT = 200
+    GRID_STATS_PLOT_HEIGHT = 600
 
     # Set the size of the neighborhood
     NEIGHBOURHOOD_SIZE = [GRID_HEIGHT_CELLS // 8, GRID_HEIGHT_CELLS // 2, GRID_HEIGHT_CELLS]
@@ -51,16 +52,29 @@ def main():
                             for dist_function in DIST_FUNCTION:
                                 for boundary in BOUNDARY:
                                     for fill in FILL:
+                                        data_row = '%d,%.2f,%s,' % (neighbourhood_size,
+                                                                   prob_generation,
+                                                                   method)
+
                                         screenshot_name = 'Neigh%dProb%.2fMethod%s' % (neighbourhood_size,
                                                                                        prob_generation,
                                                                                        method)
                                         if method == 'local':
+                                            data_row += '%.1f,%.1f,' % (coupling_constant,
+                                                                       initial_temperature)
                                             screenshot_name += 'Coup%.1fTemp%.1f' % (coupling_constant,
-                                                                                       initial_temperature)
+                                                                                     initial_temperature)
+                                        else:
+                                            data_row += 'NaN,NaN,'
+
                                         screenshot_name += 'Dist%sBound%s' % (dist_function, boundary)
+                                        data_row += '%s,%s,' % (dist_function, boundary)
 
                                         if boundary == 'fill':
                                             screenshot_name += 'Fill%d' % fill
+                                            data_row += '%d,' % fill
+                                        else:
+                                            data_row += 'NaN,'
 
                                         goi = GameOfIce(width=GRID_WIDTH_CELLS,
                                                         height=GRID_HEIGHT_CELLS,
@@ -79,9 +93,9 @@ def main():
                                         # Create a Grid2D instance to visualize the grid
                                         vis = Grid2D(goi, CELL_SIZE)
                                         # Create a StatsPlot instance to plot the statistics
-                                        vis2 = StatsPlot(goi,
-                                                         width=GRID_STATS_PLOT_WIDTH,
-                                                         height=GRID_STATS_PLOT_HEIGHT)
+                                        stats_plot = StatsPlot(goi,
+                                                               width=GRID_STATS_PLOT_WIDTH,
+                                                               height=GRID_STATS_PLOT_HEIGHT)
 
                                         # Create a CustomDisplay instance to display the simulation
                                         display = CustomDisplay(goi,
@@ -97,9 +111,25 @@ def main():
                                         # the display
                                         display.add_simulator(goi)
                                         display.add_visual(vis, 0, GRID_STATS_PLOT_HEIGHT)
-                                        display.add_visual(vis2)
+                                        display.add_visual(stats_plot)
                                         # Run the simulation using the simcx library
                                         simcx.run()
+
+                                        if method == 'global':
+                                            data_row += '%.5f,' % stats_plot.phase_sensitivity
+                                        else:
+                                            data_row += 'NaN,'
+                                        data_row += '%.5f,%.5f,%.5f,%.5f,%d' % (stats_plot.phase_sensitivity,
+                                                                                stats_plot.magnetization_,
+                                                                                stats_plot.corr,
+                                                                                stats_plot.e,
+                                                                                goi.step_counter)
+                                        observations = input('Observations: ')
+                                        if len(observations) == 0:
+                                            observations = 'None'
+                                        data_row += observations
+                                        f.write(data_row)
+                                        f.flush()
 
 
 if __name__ == '__main__':

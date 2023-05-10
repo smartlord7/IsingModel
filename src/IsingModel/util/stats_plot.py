@@ -26,17 +26,17 @@ class StatsPlot(simcx.MplVisual):
         self.sim = sim
         # Initialize the x and y arrays for the plot
         self.x = [0]
-        mean_influences = np.mean(self.sim.sum_inf_neighbours)
-        mean_states = magnetization(self.sim.values)
-        corr = correlation(self.sim.values)
-        e = energy(self.sim.values)
+        self.phase_sensitivity = np.mean(self.sim.sum_inf_neighbours)
+        self.magnetization_ = magnetization(self.sim.values)
+        self.corr = correlation(self.sim.values)
+        self.e = energy(self.sim.values)
         std_influences = np.std(self.sim.values)
 
-        self.y1 = [mean_influences]
-        self.y2 = [mean_states]
+        self.y1 = [self.phase_sensitivity]
+        self.y2 = [self.magnetization_]
         self.y3 = [std_influences]
-        self.y4 = [corr]
-        self.y5 = [e]
+        self.y4 = [self.corr]
+        self.y5 = [self.e]
 
         # Create a subplot with the appropriate labels and limits
         self.ax2 = self.figure.add_subplot(3, 1, 1)
@@ -56,7 +56,7 @@ class StatsPlot(simcx.MplVisual):
         if sim.method == 'global':
             self.line1, = self.ax1.plot(self.x, self.y1, label='Phase-sensitivity')
         self.line2, = self.ax1.plot(self.x, self.y2, label='Magnetization')
-        self.line4, = self.ax1.plot(self.x, self.y4, label='Correlation')
+        self.line4, = self.ax1.plot(self.x, self.y4, label='self.correlation')
         # self.line3, = self.ax1.plot(self.x, self.y3, label='Influences std')
         plt.legend(fontsize='8')
 
@@ -78,18 +78,18 @@ class StatsPlot(simcx.MplVisual):
         # Update the x and y arrays with the latest statistics
         self.x.append(self.x[-1] + 1)
         if self.sim.method == 'global':
-            mean_influences = np.mean(self.sim.sum_inf_neighbours)
-        mean_states = np.mean(self.sim.values)
-        corr = correlation(self.sim.values)
-        e = energy(self.sim.values)
+            self.phase_sensitivity = np.mean(self.sim.sum_inf_neighbours)
+        self.magnetization_ = np.mean(self.sim.values)
+        self.corr = correlation(self.sim.values)
+        self.e = energy(self.sim.values)
         # std_influences = np.std(self.sim.values)
 
         if self.sim.method == 'global':
-            self.y1.append(mean_influences)
-        self.y2.append(mean_states)
+            self.y1.append(self.phase_sensitivity)
+        self.y2.append(self.magnetization_)
         # self.y3.append(std_influences)
-        self.y4.append(corr)
-        self.y5.append(e)
+        self.y4.append(self.corr)
+        self.y5.append(self.e)
 
         # If the maximum time has been reached, increase the maximum time and update the x limit of the plot
         if self.x[-1] > self._max_time:
