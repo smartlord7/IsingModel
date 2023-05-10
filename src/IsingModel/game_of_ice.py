@@ -1,14 +1,7 @@
-# -*- coding: utf-8 -*- ----------------------------------------------------------------------------- Copyright (c)
-# 2022-2023 David Ressurreição & Sancho Simões (based on the original GameOfLife from 2015-2016 - Tiago Batista) All
-# rights reserved. -----------------------------------------------------------------------------
+# -*- coding: utf-8 -*-
 
-'''
-Game of Life example using the simcx framework.
-
-'''
-
+# Import necessary modules
 from __future__ import division
-
 import simcx
 from scipy import signal
 from util.graphic_util import *
@@ -19,8 +12,37 @@ __author__ = 'David Ressurreição & Sancho Simões (based on the original GameO
 
 
 class GameOfIce(simcx.Simulator):
-    '''A Game of Ice simulator.'''
+    """
+    A Game of Ice simulator.
 
+    Parameters:
+    -----------
+    width : int, optional (default=50)
+        Width of the grid.
+    height : int, optional (default=50)
+        Height of the grid.
+    neighbourhood_size : int, optional (default=1)
+        Size of the neighbourhood for each cell.
+    method : str, optional (default='global')
+        Method used to update the grid. Can be 'global' or 'local'.
+    initial_temperature : float, optional (default=1.0)
+        Initial temperature of the simulation.
+    n_temperature_decay_steps : int, optional (default=100)
+        Number of temperature decay steps.
+    coupling_constant : float, optional (default=1.0)
+        Coupling constant used in the local field calculation.
+    dist_func : str, optional (default='gaussian')
+        Distribution function used to create the initial grid.
+    func_config : dict, optional (default=None)
+        Configuration dictionary for the distribution function.
+    boundary : str, optional (default='fill')
+        Boundary condition used in the convolution.
+    fill : int, optional (default=0)
+        Fill value used in the convolution.
+
+    """
+
+    # Default parameter values
     DEFAULT_WIDTH = 50
     DEFAULT_HEIGHT = 50
     DEFAULT_NEIGHBOUR_SIZE = 1
@@ -33,20 +55,20 @@ class GameOfIce(simcx.Simulator):
     DEFAULT_N_TEMPERATURE_DECAY_STEPS = 100
 
     def __init__(self,
-
                  width: int = DEFAULT_WIDTH,
                  height: int = DEFAULT_HEIGHT,
                  neighbourhood_size: int = DEFAULT_NEIGHBOUR_SIZE,
-                 method: str = 'global',
+                 method: str = DEFAULT_METHOD,
                  initial_temperature: float = DEFAULT_INITIAL_TEMPERATURE,
-                 n_temperature_decay_steps: int = DEFAULT_N_TEMPERATURE_DECAY_STEPS, # as if
+                 n_temperature_decay_steps: int = DEFAULT_N_TEMPERATURE_DECAY_STEPS,
                  coupling_constant: float = DEFAULT_COUPLING_CONSTANT,
                  dist_func: str = DEFAULT_DIST_FUNC,
                  func_config: dict = None,
-                 boundary: str = 'fill',
+                 boundary: str = DEFAULT_BOUNDARY,
                  fill: int = DEFAULT_FILL):
         super(GameOfIce, self).__init__()
 
+        # Set the simulation parameters
         self.width = width
         self.height = height
         self.neighbourhood_size = neighbourhood_size
@@ -60,9 +82,7 @@ class GameOfIce(simcx.Simulator):
         self.fill = fill
         self.sum_inf_neighbours = np.zeros((self.height, self.width))
 
-        # Create grid and perform gaussian function
-
-        # Replace the center to 0
+        # Create grid and perform distribution function
         center_x, center_y = np.array((height, width)) // 2
         x, y, mesh = create_mesh2d(width, height, mn=0, mx=width)
 
@@ -73,7 +93,6 @@ class GameOfIce(simcx.Simulator):
                 std = func_config['std']
 
             grid = gaussian(mesh, mean=(center_x, center_y), std=std)
-            # grid += center_value / (width * height - 1) # increase equally to the remaining cells
         elif dist_func == 'exp_decay':
             decay_rate = (((height + width) / 2) ** (1 / 2))
 
@@ -81,7 +100,6 @@ class GameOfIce(simcx.Simulator):
                 decay_rate = func_config['decay_rate']
 
             grid = exp_decay(mesh, center=(center_x, center_y), decay_rate=decay_rate)
-            # grid += center_value / (width * height - 1) # increase equally to the remaining cells
         elif dist_func == 'normal':
             grid = np.ones((height, width))
         elif dist_func == "rayleigh":
@@ -94,17 +112,30 @@ class GameOfIce(simcx.Simulator):
         grid /= sm
 
         # Extract a sub-grid from the modified grid
-        sub_grid_size = (neighbourhood_size, neighbourhood_size)  # set the desired size of the sub-grid
+        sub_grid_size = (neighbourhood_size, neighbourhood_size)
         sub_grid_x, sub_grid_y = sub_grid_size[0], sub_grid_size[1]
         neighbour_init = grid[center_x - sub_grid_x:center_x + sub_grid_x + 1,
                          center_y - sub_grid_y:center_y + sub_grid_y + 1]
-
-        # print(neighbour_init)
 
         self.neighbourhood = neighbour_init
         self.dirty = False
 
     def local_field(self, i, j):
+        """
+        Calculate the local field for a given cell.
+
+        Parameters:
+        -----------
+        i : int
+            Row index of the cell.
+        j : int
+            Column index of the cell.
+
+        Returns:
+        --------
+        float
+            Local field value.
+        """
         top = self.values[(i - 1) % self.height, j]
         bottom = self.values[(i + 1) % self.height, j]
         left = self.values[i, (j - 1) % self.width]
@@ -113,17 +144,52 @@ class GameOfIce(simcx.Simulator):
         return self.coupling_constant * (top + bottom + left + right)
 
     def local_prob_switch(self, i, j):
+        """
+        Calculate the probability of a cell switching its state based on the local field and the current temperature.
+
+        Parameters:
+        -----------
+        i : int
+            Row index of the cell.
+        j : int
+            Column index of the cell.
+
+        Returns:
+        --------
+        float
+            Probability of the cell switching its state.
+        """
         t = self.temperature
         e = -self.local_field(i, j) * self.values[i, j]
 
-        return np.exp(-e / t) / (np.exp(-e / t) + np.exp(e / t)) # boltzmann distribution
+        return np.exp(-e / t) / (np.exp(-e / t) + np.exp(e / t))  # boltzmann distribution
 
     def random(self, prob):
+        """
+        Initialize the grid with random values based on a given probability.
+
+        Parameters:
+        -----------
+        prob : float
+            Probability of a cell being alive.
+        """
         self.values = np.random.choice((-1, +1), (self.height, self.width),
                                        p=(1 - prob, prob))
         self.dirty = True
 
     def add_block(self, block, pos_x, pos_y):
+        """
+        Add a block of cells to the grid at a given position.
+
+        Parameters:
+        -----------
+        block : numpy.ndarray
+            Block of cells to add to the grid.
+        pos_x : int
+            X-coordinate of the position to add the block.
+        pos_y : int
+            Y-coordinate of the position to add the block.
+        """
         height, width = block.shape
 
         for y in range(height):
@@ -133,14 +199,16 @@ class GameOfIce(simcx.Simulator):
         self.dirty = True
 
     def step(self, delta=0):
-        if self.temperature - self.temperature_decay_step > 0: # linear temperature annealing
+        """
+        Update the grid by applying the Game of Life rules.
+        """
+        if self.temperature - self.temperature_decay_step > 0:
             self.temperature -= self.temperature_decay_step
 
         if self.method == 'global':
             self.sum_inf_neighbours = signal.convolve2d(self.values, self.neighbourhood,
                                                         mode='same', boundary=self.boundary, fillvalue=self.fill)
 
-        # NumPy power in order to considerably accelerate the simulation :-D
         if self.method == 'global':
             n = self.sum_inf_neighbours
             mask1 = np.random.random(size=n.shape) < n

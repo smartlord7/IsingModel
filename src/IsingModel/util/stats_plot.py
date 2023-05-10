@@ -12,8 +12,11 @@ class StatsPlot(simcx.MplVisual):
         Initializes a StatsPlot instance.
 
         Parameters:
-        - sim: A GameOfIce instance representing the simulation.
-        - **kwargs: Additional keyword arguments to pass to the parent class constructor.
+        -----------
+        sim : GameOfIce
+            A GameOfIce instance representing the simulation.
+        **kwargs : dict
+            Additional keyword arguments to pass to the parent class constructor.
         """
         super(StatsPlot, self).__init__(sim, **kwargs)
 
