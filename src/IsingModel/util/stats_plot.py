@@ -40,7 +40,8 @@ class StatsPlot(simcx.MplVisual):
 
         self._max_time = 100
         # Initialize the lines for the plot
-        self.line1, = self.ax1.plot(self.x, self.y1, label='Influences mean')
+        if sim.method == 'global':
+            self.line1, = self.ax1.plot(self.x, self.y1, label='Influences mean')
         self.line2, = self.ax1.plot(self.x, self.y2,  label='States mean')
         # self.line3, = self.ax1.plot(self.x, self.y3, label='Influences std')
         plt.legend()
@@ -54,13 +55,15 @@ class StatsPlot(simcx.MplVisual):
         """
         # Update the x and y arrays with the latest statistics
         self.x.append(self.x[-1] + 1)
-        mean_influences = np.mean(self.sim.sum_inf_neighbours)
+        if self.sim.method == 'global':
+            mean_influences = np.mean(self.sim.sum_inf_neighbours)
         mean_states = np.mean(self.sim.values)
-        std_influences = np.std(self.sim.values)
+        # std_influences = np.std(self.sim.values)
 
-        self.y1.append(mean_influences)
+        if self.sim.method == 'global':
+            self.y1.append(mean_influences)
         self.y2.append(mean_states)
-        self.y3.append(std_influences)
+        # self.y3.append(std_influences)
 
         # If the maximum time has been reached, increase the maximum time and update the x limit of the plot
         if self.x[-1] > self._max_time:
@@ -68,11 +71,17 @@ class StatsPlot(simcx.MplVisual):
             self.ax1.set_xlim(0, self._max_time)
 
         # Update the y limit of the plot based on the current minimum and maximum values of the y arrays
-        min_v = min(min(self.y1), min(self.y2))
-        max_v = max(max(self.y1), max(self.y2))
+        if self.sim.method == 'global':
+            min_v = min(min(self.y1), min(self.y2))
+            max_v = max(max(self.y1), max(self.y2))
+        else:
+            min_v = min(self.y2)
+            max_v = max(self.y2)
+
         self.ax1.set_ylim(min_v - 0.01, max_v + 0.01)
 
         # Update the lines of the plot with the new x and y values
-        self.line1.set_data(self.x, self.y1)
+        if self.sim.method == 'global':
+            self.line1.set_data(self.x, self.y1)
         self.line2.set_data(self.x, self.y2)
         # self.line3.set_data(self.x, self.y3)

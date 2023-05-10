@@ -33,7 +33,7 @@ def main():
                     coupling_constant=2,
                     initial_temperature=300,
                     dist_func='gaussian',
-                    method="local",
+                    method="global",
                     fill=0)
 
     # Generate a random spin configuration
