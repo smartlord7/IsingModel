@@ -1,2 +1,0 @@
-code,neighbourhood,prob_generation,method,coupling_constant,initial_temperature,dist_function,boundary,fill,phase_sensitivity,std,magnetization,correlation,energy,time,observations
- Neigh12Prob0.25MethodglobalDistgaussianBoundwrap,12,0.25,global,NaN,NaN,gaussian,wrap,NaN,-0.61677,0.08239,-0.99660,0.99320,39728.00000,7,None

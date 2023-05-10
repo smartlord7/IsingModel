@@ -35,7 +35,7 @@ def main():
     # Set the probability of generating a spin up
     PROB_GENERATION = [0.25, 0.50, 0.75]
     COUPLING_CONSTANT = [0.1, 1.0, 4.0]
-    METHOD = ['global', 'local']
+    METHOD = ['global']
     INITIAL_TEMPERATURE = [300, 20]
     DIST_FUNCTION = ['gaussian']
     BOUNDARY = ['wrap', 'fill']
@@ -127,7 +127,7 @@ def main():
                                         if len(observations) == 0:
                                             observations = 'None'
                                         data_row += observations
-                                        data_row = run_code + ',' + data_row
+                                        data_row = run_code + ',' + data_row + '\n'
                                         f.write(data_row)
                                         f.flush()
 
