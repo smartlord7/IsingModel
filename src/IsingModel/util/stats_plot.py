@@ -30,11 +30,11 @@ class StatsPlot(simcx.MplVisual):
         self.magnetization_ = magnetization(self.sim.values)
         self.corr = correlation(self.sim.values)
         self.e = energy(self.sim.values)
-        std_influences = np.std(self.sim.values)
+        self.std = np.std(self.sim.values)
 
         self.y1 = [self.phase_sensitivity]
         self.y2 = [self.magnetization_]
-        self.y3 = [std_influences]
+        self.y3 = [self.std]
         self.y4 = [self.corr]
         self.y5 = [self.e]
 
@@ -57,7 +57,7 @@ class StatsPlot(simcx.MplVisual):
             self.line1, = self.ax1.plot(self.x, self.y1, label='Phase-sensitivity')
         self.line2, = self.ax1.plot(self.x, self.y2, label='Magnetization')
         self.line4, = self.ax1.plot(self.x, self.y4, label='self.correlation')
-        # self.line3, = self.ax1.plot(self.x, self.y3, label='Influences std')
+        # self.line3, = self.ax1.plot(self.x, self.y3, label='Influences self.std')
         plt.legend(fontsize='8')
 
         self.ax3 = self.figure.add_subplot(3, 1, 3)
@@ -82,7 +82,7 @@ class StatsPlot(simcx.MplVisual):
         self.magnetization_ = np.mean(self.sim.values)
         self.corr = correlation(self.sim.values)
         self.e = energy(self.sim.values)
-        # std_influences = np.std(self.sim.values)
+        self.std = np.std(self.sim.values)
 
         if self.sim.method == 'global':
             self.y1.append(self.phase_sensitivity)

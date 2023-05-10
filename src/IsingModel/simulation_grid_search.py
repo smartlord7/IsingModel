@@ -20,8 +20,8 @@ def main():
     GRID_HEIGHT_CELLS = 100
     curr_time = perf_counter()
     LOG_FILE_PATH = str(curr_time) + 'output.log'
-    LOG_FILE_HEADER = 'neighbourhood,prob_generation,method,coupling_constant,initial_temperature,dist_function,' \
-                      'boundary,fill,phase_sensitivity,magnetization,correlation,energy,time,observations\n '
+    LOG_FILE_HEADER = 'code,neighbourhood,prob_generation,method,coupling_constant,initial_temperature,dist_function,' \
+                      'boundary,fill,phase_sensitivity,std,magnetization,correlation,energy,time,observations\n '
 
     # Set the size of the cells in the visualization
     CELL_SIZE = 3
@@ -56,22 +56,22 @@ def main():
                                                                    prob_generation,
                                                                    method)
 
-                                        screenshot_name = 'Neigh%dProb%.2fMethod%s' % (neighbourhood_size,
+                                        run_code = 'Neigh%dProb%.2fMethod%s' % (neighbourhood_size,
                                                                                        prob_generation,
                                                                                        method)
                                         if method == 'local':
                                             data_row += '%.1f,%.1f,' % (coupling_constant,
                                                                        initial_temperature)
-                                            screenshot_name += 'Coup%.1fTemp%.1f' % (coupling_constant,
+                                            run_code += 'Coup%.1fTemp%.1f' % (coupling_constant,
                                                                                      initial_temperature)
                                         else:
                                             data_row += 'NaN,NaN,'
 
-                                        screenshot_name += 'Dist%sBound%s' % (dist_function, boundary)
+                                        run_code += 'Dist%sBound%s' % (dist_function, boundary)
                                         data_row += '%s,%s,' % (dist_function, boundary)
 
                                         if boundary == 'fill':
-                                            screenshot_name += 'Fill%d' % fill
+                                            run_code += 'Fill%d' % fill
                                             data_row += '%d,' % fill
                                         else:
                                             data_row += 'NaN,'
@@ -100,13 +100,13 @@ def main():
                                         # Create a CustomDisplay instance to display the simulation
                                         display = CustomDisplay(goi,
                                                                 vis,
-                                                                screenshot_name,
+                                                                run_code,
                                                                 x_min=0,
                                                                 x_max=CELL_SIZE * GRID_WIDTH_CELLS,
                                                                 y_min=GRID_STATS_PLOT_HEIGHT,
                                                                 y_max=GRID_STATS_PLOT_HEIGHT + CELL_SIZE * GRID_HEIGHT_CELLS,
                                                                 cell_size=CELL_SIZE,
-                                                                interval=0.1)
+                                                                interval=0.01)
                                         # Add the GameOfIce instance, the Grid2D instance, and the StatsPlot instance to
                                         # the display
                                         display.add_simulator(goi)
@@ -116,11 +116,10 @@ def main():
                                         simcx.run()
 
                                         if method == 'global':
-                                            data_row += '%.5f,' % stats_plot.phase_sensitivity
+                                            data_row += '%.5f,%.5f,' % (stats_plot.phase_sensitivity, stats_plot.std)
                                         else:
-                                            data_row += 'NaN,'
-                                        data_row += '%.5f,%.5f,%.5f,%.5f,%d' % (stats_plot.phase_sensitivity,
-                                                                                stats_plot.magnetization_,
+                                            data_row += 'NaN,NaN,'
+                                        data_row += '%.5f,%.5f,%.5f,%d,' % (stats_plot.magnetization_,
                                                                                 stats_plot.corr,
                                                                                 stats_plot.e,
                                                                                 goi.step_counter)
@@ -128,6 +127,7 @@ def main():
                                         if len(observations) == 0:
                                             observations = 'None'
                                         data_row += observations
+                                        data_row = run_code + ',' + data_row
                                         f.write(data_row)
                                         f.flush()
 
