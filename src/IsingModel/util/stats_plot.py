@@ -7,9 +7,9 @@ from matplotlib import pyplot as plt
 from game_of_ice import GameOfIce
 
 
-class GridMeanPlot(simcx.MplVisual):
+class StatsPlot(simcx.MplVisual):
     def __init__(self, sim: GameOfIce, **kwargs):
-        super(GridMeanPlot, self).__init__(sim, **kwargs)
+        super(StatsPlot, self).__init__(sim, **kwargs)
 
         self.sim = sim
         self.x = [0]

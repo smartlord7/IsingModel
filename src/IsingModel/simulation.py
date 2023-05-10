@@ -1,6 +1,6 @@
 import simcx
 from game_of_ice import Grid2D, GameOfIce
-from grid_mean_plot import GridMeanPlot
+from util.stats_plot import StatsPlot
 from util.custom_display import CustomDisplay
 
 
@@ -28,9 +28,9 @@ def main():
     goi.random(PROB_GENERATION)
 
     vis = Grid2D(goi, CELL_SIZE)
-    vis2 = GridMeanPlot(goi,
-                        width=GRID_MEAN_PLOT_WIDTH,
-                        height=GRID_MEAN_PLOT_HEIGHT)
+    vis2 = StatsPlot(goi,
+                     width=GRID_MEAN_PLOT_WIDTH,
+                     height=GRID_MEAN_PLOT_HEIGHT)
 
     display = CustomDisplay(goi,
                             x_min=0,

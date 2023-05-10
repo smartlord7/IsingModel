@@ -1,7 +1,7 @@
 import matplotlib
 import matplotlib.pyplot as plt
 from distribution_functions import *
-from graphic_util import *
+from util.graphic_util import *
 
 matplotlib.use('TkAgg')
 n_points = 21
