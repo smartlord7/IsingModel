@@ -3,6 +3,7 @@
 # Import necessary modules
 from __future__ import division
 
+import copy
 from typing import Callable, Any
 
 import numpy as np
@@ -90,6 +91,7 @@ class GameOfIce(simcx.Simulator):
         self.boundary = boundary
         self.fill = fill
         self.sum_inf_neighbours = np.zeros((self.height, self.width))
+        self.initial_values = np.zeros((self.height, self.width))
 
         # Create grid and perform distribution function
         center_x, center_y = np.array((height, width)) // 2
@@ -114,7 +116,7 @@ class GameOfIce(simcx.Simulator):
         elif dist_func == "rayleigh":
             grid = rayleigh(mesh, center=(center_x, center_y), sigma=5.0)
         elif dist_func == "log_normal":
-            grid = log_normal_distribution(mesh, center=(center_x, center_y), sigma=1.0, mu=0.0)
+            grid = log_normal(mesh, center=(center_x, center_y), sigma=1.0, mu=0.0)
 
         grid[center_x, center_y] = 0  # reset the center cell
         sm = np.sum(grid)  # normalize so that the sum is ~ 1
@@ -184,6 +186,7 @@ class GameOfIce(simcx.Simulator):
         """
         self.values = np.random.choice((-1, +1), (self.height, self.width),
                                        p=(1 - prob, prob))
+        self.initial_values = copy.deepcopy( self.values)
         self.dirty = True
 
     def add_block(self, block, pos_x, pos_y):

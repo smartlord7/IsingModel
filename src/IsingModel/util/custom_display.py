@@ -1,3 +1,4 @@
+import copy
 from typing import Callable, Any
 
 import numpy as np
@@ -5,6 +6,7 @@ import pyglet
 from simcx import Display
 from game_of_ice import GameOfIce
 from perturbations import perturb_circle
+from util.grid_2d import Grid2D
 
 
 class CustomDisplay(Display):
@@ -14,6 +16,7 @@ class CustomDisplay(Display):
 
     def __init__(self,
                  sim: GameOfIce,
+                 grid: Grid2D,
                  x_min: int,
                  x_max: int,
                  y_min: int,
@@ -55,11 +58,13 @@ class CustomDisplay(Display):
         super().__init__(width, height, interval, multi_sampling, **kwargs)
 
         self.sim = sim
+        self.grid = grid
         self.x_min = x_min
         self.x_max = x_max
         self.y_min = y_min
         self.y_max = y_max
         self.cell_size = cell_size
+        self.initial_values = copy.deepcopy(self.sim.initial_values)
         self.perturbation_radius = min(self.sim.width, self.sim.height) // 10
 
     def _convert_to_grid(self, x, y):
@@ -108,6 +113,15 @@ class CustomDisplay(Display):
                 self.sim.perturbate(x, y, radius, +1)
             elif button == pyglet.window.mouse.RIGHT:
                 self.sim.perturbate(x, y, radius, -1)
+
+    def on_key_press(self, symbol,  mod):
+        super(CustomDisplay, self).on_key_press(symbol, mod)
+
+        if symbol == pyglet.window.key.C and mod == pyglet.window.key.MOD_CTRL:
+            self.close()
+        elif symbol == pyglet.window.key.R:
+            self.sim.values = self.initial_values
+            self.grid.draw()
 
     def on_mouse_release(self, x, y, button, modifiers):
         """

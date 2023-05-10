@@ -64,7 +64,7 @@ def rayleigh(mesh: tuple, center: tuple = (0.5, 0.5), sigma=2.0):
     return (distances / sigma ** 2) * np.exp(-distances ** 2 / (2 * sigma ** 2))
 
 
-def log_normal_distribution(mesh: tuple, center: tuple = (0.5, 0.5), sigma=1.0, mu=0.0):
+def log_normal(mesh: tuple, center: tuple = (0.5, 0.5), sigma=1.0, mu=0.0):
     """
     Returns a 2D log-normal distribution.
 
