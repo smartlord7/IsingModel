@@ -79,9 +79,10 @@ class CustomDisplay(Display):
 
     def on_mouse_scroll(self, x, y, scroll_x, scroll_y):
         if scroll_y > 0:
-            self.perturbation_radius += 1
+            self.perturbation_radius += 3
         elif scroll_y < 0:
-            self.perturbation_radius -= 1
+            if self.perturbation_radius - 3 > 0:
+                self.perturbation_radius -= 3
 
     def on_mouse_press(self, x, y, button, modifiers):
         """
@@ -107,7 +108,6 @@ class CustomDisplay(Display):
                 self.sim.perturbate(x, y, radius, +1)
             elif button == pyglet.window.mouse.RIGHT:
                 self.sim.perturbate(x, y, radius, -1)
-
 
     def on_mouse_release(self, x, y, button, modifiers):
         """

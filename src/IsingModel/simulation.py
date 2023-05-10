@@ -1,5 +1,6 @@
 import simcx
 from game_of_ice import GameOfIce
+from perturbations import perturb_square
 from util.grid_2d import Grid2D
 from util.stats_plot import StatsPlot
 from util.custom_display import CustomDisplay
@@ -28,9 +29,11 @@ def main():
     goi = GameOfIce(width=GRID_WIDTH_CELLS,
                     height=GRID_HEIGHT_CELLS,
                     neighbourhood_size=NEIGHBOURHOOD_SIZE,
+                    perturbation_function=perturb_square,
+                    coupling_constant=2,
                     initial_temperature=300,
                     dist_func='gaussian',
-                    method="global",
+                    method="local",
                     fill=0)
 
     # Generate a random spin configuration
