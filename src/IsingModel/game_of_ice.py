@@ -64,7 +64,7 @@ class GameOfIce(simcx.Simulator):
 
         # Replace the center to 0
         center_x, center_y = np.array((height, width)) // 2
-        x, y, mesh = create_mesh2d(width, height, min=0, max=width)
+        x, y, mesh = create_mesh2d(width, height, mn=0, mx=width)
 
         if dist_func == 'gaussian':
             std = (width ** (1 / 2), height ** (1 / 2))

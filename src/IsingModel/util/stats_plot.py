@@ -1,10 +1,9 @@
 from __future__ import division
 
-import numpy as np
 import simcx
-from matplotlib import pyplot as plt
-
+import numpy as np
 from game_of_ice import GameOfIce
+from matplotlib import pyplot as plt
 
 
 class StatsPlot(simcx.MplVisual):

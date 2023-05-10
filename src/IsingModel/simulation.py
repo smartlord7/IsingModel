@@ -1,5 +1,6 @@
 import simcx
-from game_of_ice import Grid2D, GameOfIce
+from game_of_ice import GameOfIce
+from util.grid_2d import Grid2D
 from util.stats_plot import StatsPlot
 from util.custom_display import CustomDisplay
 
@@ -10,19 +11,20 @@ def main():
     func_config = {
         'decay_rate': 1
     }
-    GRID_WIDTH_CELLS = 100
-    GRID_HEIGHT_CELLS = 100
+    GRID_WIDTH_CELLS = 200
+    GRID_HEIGHT_CELLS = 200
     NEIGHBOURHOOD_SIZE = 200
     PROB_GENERATION = 0.5
-    CELL_SIZE = 5
+    CELL_SIZE = 2
     GRID_MEAN_PLOT_WIDTH = GRID_WIDTH_CELLS * CELL_SIZE
-    GRID_MEAN_PLOT_HEIGHT = int(GRID_HEIGHT_CELLS / CELL_SIZE)
+    GRID_MEAN_PLOT_HEIGHT = 200
 
     goi = GameOfIce(width=GRID_WIDTH_CELLS,
                     height=GRID_HEIGHT_CELLS,
                     neighbourhood_size=NEIGHBOURHOOD_SIZE,
                     initial_temperature=300,
-                    method="local",
+                    dist_func='exp_decay',
+                    method="global",
                     fill=-1)
 
     goi.random(PROB_GENERATION)

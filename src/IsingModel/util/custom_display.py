@@ -23,7 +23,6 @@ class CustomDisplay(Display):
                  multi_sampling=True,
                  **kwargs):
         super().__init__(width, height, interval, multi_sampling, **kwargs)
-        self.show_fps = True
 
         self.sim = sim
         self.x_min = x_min

@@ -1,13 +1,10 @@
 import numpy as np
 
 
-def create_mesh2d(x_points, y_points, min=0, max=1):
-    dx = (max - min) / x_points
-    dy = (max - min) / y_points
-
+def create_mesh2d(x_points, y_points, mn=0, mx=1):
     # Create arrays for the x and y positions of the grid lines
-    x = np.linspace(min, max, x_points,  endpoint=False) # + dx / 2
-    y = np.linspace(min, max, y_points, endpoint=False) # + dy / 2
+    x = np.linspace(mn, mx, x_points,  endpoint=False)
+    y = np.linspace(mn, mx, y_points, endpoint=False)
     xv, yv = np.meshgrid(x, y)
     mesh = (xv, yv)
 
