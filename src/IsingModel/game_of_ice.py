@@ -135,23 +135,23 @@ class GameOfIce(simcx.Simulator):
     def step(self, delta=0):
         if self.temperature - self.temperature_decay_step > 0: # linear temperature annealing
             self.temperature -= self.temperature_decay_step
-        print(self.temperature)
 
         if self.method == 'global':
             self.sum_inf_neighbours = signal.convolve2d(self.values, self.neighbourhood,
                                                         mode='same', boundary=self.boundary, fillvalue=self.fill)
-        for y in range(self.height):
-            for x in range(self.width):
-                if self.method == 'global':
-                    n = self.sum_inf_neighbours[y, x]
-                    # if n > 0: print(n)
-                    if np.random.random() < n and n > 0:
-                        self.values[y, x] = +1
-                    elif -np.random.random() > n:
-                        self.values[y, x] = -1
-                elif self.method == 'local':
-                    p = self.local_prob_switch(y, x)
-                    if np.random.rand() < p:
-                        self.values[y, x] = -self.values[y, x]
+
+        # NumPy power in order to considerably accelerate the simulation :-D
+        if self.method == 'global':
+            n = self.sum_inf_neighbours
+            mask1 = np.random.random(size=n.shape) < n
+            mask2 = -np.random.random(size=n.shape) > n
+            self.values[mask1 & (n > 0)] = +1
+            self.values[mask2] = -1
+        elif self.method == 'local':
+            inf = self.local_field(np.arange(self.height)[:, None], np.arange(self.width))
+            e = -inf * self.values
+            p = np.exp(-e / self.temperature) / (np.exp(-e / self.temperature) + np.exp(e / self.temperature))
+            mask = np.random.rand(*self.values.shape) < p
+            self.values[mask] = -self.values[mask]
 
         self.dirty = True

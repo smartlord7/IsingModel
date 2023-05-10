@@ -31,6 +31,8 @@ class StatsPlot(simcx.MplVisual):
         # self.line3, = self.ax1.plot(self.x, self.y3, label='Influences std')
         plt.legend()
 
+
+
         self.update_image()
 
     def draw(self):
