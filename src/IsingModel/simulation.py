@@ -16,11 +16,11 @@ def main():
     GRID_WIDTH_CELLS = 100
     GRID_HEIGHT_CELLS = 100
     # Set the size of the neighborhood
-    NEIGHBOURHOOD_SIZE = 200
+    NEIGHBOURHOOD_SIZE = max(GRID_WIDTH_CELLS, GRID_HEIGHT_CELLS)
     # Set the probability of generating a spin up
     PROB_GENERATION = 0.5
     # Set the size of the cells in the visualization
-    CELL_SIZE = 4
+    CELL_SIZE = 10
     # Set the size of the stats plot
     GRID_STATS_PLOT_WIDTH = GRID_WIDTH_CELLS * CELL_SIZE
     GRID_STATS_PLOT_HEIGHT = 200
