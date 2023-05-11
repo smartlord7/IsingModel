@@ -33,7 +33,7 @@ def main():
     # Set the size of the neighborhood
     NEIGHBOURHOOD_SIZE = [GRID_HEIGHT_CELLS // 8, GRID_HEIGHT_CELLS // 2, GRID_HEIGHT_CELLS]
     # Set the probability of generating a spin up
-    PROB_GENERATION = [0.25, 0.50, 0.75]
+    PROB_GENERATION = [0.50, 0.75]
     COUPLING_CONSTANT = [0.1, 1.0, 4.0]
     METHOD = ['global']
     INITIAL_TEMPERATURE = [300, 20]
