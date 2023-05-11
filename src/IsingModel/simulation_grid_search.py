@@ -1,3 +1,4 @@
+from random import seed
 from time import perf_counter
 
 import simcx
@@ -10,10 +11,12 @@ from util.custom_display import CustomDisplay
 
 
 def main():
+
+    seed(0)
     # Example patterns
     # FUNCTIONS: exp / gaussian / ...
     func_config = {
-        'decay_rate': 1
+        'decay_rate': -3
     }
     # Set the size of the grid
     GRID_WIDTH_CELLS = 100
@@ -31,15 +34,15 @@ def main():
     GRID_STATS_PLOT_HEIGHT = 600
 
     # Set the size of the neighborhood
-    NEIGHBOURHOOD_SIZE = [GRID_HEIGHT_CELLS // 8, GRID_HEIGHT_CELLS // 2, GRID_HEIGHT_CELLS]
+    NEIGHBOURHOOD_SIZE = [GRID_HEIGHT_CELLS]
     # Set the probability of generating a spin up
-    PROB_GENERATION = [0.50, 0.75]
-    COUPLING_CONSTANT = [0.1, 1.0, 4.0]
+    PROB_GENERATION = [0.50]
+    COUPLING_CONSTANT = [1]
     METHOD = ['global']
-    INITIAL_TEMPERATURE = [300, 20]
-    DIST_FUNCTION = ['gaussian']
-    BOUNDARY = ['wrap', 'fill']
-    FILL = [-1, 0, 1]
+    INITIAL_TEMPERATURE = [100]
+    DIST_FUNCTION = ['exp_decay']
+    BOUNDARY = ['fill']
+    FILL = [1]
 
     with open(LOG_FILE_PATH, 'w') as f:
         f.write(LOG_FILE_HEADER)
@@ -85,6 +88,7 @@ def main():
                                                         initial_temperature=initial_temperature,
                                                         dist_func=dist_function,
                                                         boundary=boundary,
+                                                        func_config=func_config,
                                                         fill=fill)
 
                                         # Generate a random spin configuration

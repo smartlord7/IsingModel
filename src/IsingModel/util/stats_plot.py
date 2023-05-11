@@ -25,16 +25,16 @@ class StatsPlot(simcx.MplVisual):
         self.sim = sim
         self.x = [0]
         self.phase_sensitivity = np.mean(self.sim.sum_inf_neighbours)
-        self.magnetization = magnetization(self.sim.values)
+        self.magnetization_ = magnetization(self.sim.values)
         self.corr = correlation(self.sim.values)
-        self.energy = energy(self.sim.values)
+        self.e = energy(self.sim.values)
         self.std = np.std(self.sim.values)
 
         self.y1 = [self.phase_sensitivity]
-        self.y2 = [self.magnetization]
+        self.y2 = [self.magnetization_]
         self.y3 = [self.std]
         self.y4 = [self.corr]
-        self.y5 = [self.energy]
+        self.y5 = [self.e]
 
         self._max_time = 100
 
@@ -63,7 +63,7 @@ class StatsPlot(simcx.MplVisual):
             self.line1, = self.ax1.plot(self.x, self.y1, label='Phase-sensitivity')
         self.line2, = self.ax1.plot(self.x, self.y2, label='Magnetization')
         self.line4, = self.ax1.plot(self.x, self.y4, label='Correlation')
-        plt.legend(fontsize='8')
+        plt.legend(fontsize=7)
 
         self.ax3 = self.figure.add_subplot(n_subplots, 1, n_subplots)
         self.ax3.set_xlabel('Time')
@@ -71,7 +71,9 @@ class StatsPlot(simcx.MplVisual):
         self.ax3.set_xlim(0, 100)
         self.line5, = self.ax3.plot(self.x, self.y5)
 
-        self.figure.subplots_adjust(left=0.2, hspace=0.5)
+        plt.xticks(fontsize=7)
+        plt.yticks(fontsize=7)
+        self.figure.subplots_adjust(left=0.3, hspace=0.5)
 
         self.update_image()
 
@@ -93,26 +95,26 @@ class StatsPlot(simcx.MplVisual):
         if self.sim.method == 'global':
             self.phase_sensitivity = np.mean(self.sim.sum_inf_neighbours)
 
-        self.magnetization = np.mean(self.sim.values)
+        self.magnetization_ = np.mean(self.sim.values)
         self.corr = correlation(self.sim.values)
-        self.energy = energy(self.sim.values)
+        self.e = energy(self.sim.values)
         self.std = np.std(self.sim.values)
 
         if self.sim.method == 'global':
             self.y1.append(self.phase_sensitivity)
 
-        self.y2.append(self.magnetization)
+        self.y2.append(self.magnetization_)
         self.y4.append(self.corr)
-        self.y5.append(self.energy)
+        self.y5.append(self.e)
 
     def _calculate_metrics(self):
         """
         Calculates the new values of the metrics.
         """
         self.phase_sensitivity = np.mean(self.sim.sum_inf_neighbours)
-        self.magnetization = np.mean(self.sim.values)
+        self.magnetization_ = np.mean(self.sim.values)
         self.corr = correlation(self.sim.values)
-        self.energy = energy(self.sim.values)
+        self.e = energy(self.sim.values)
         self.std = np.std(self.sim.values)
 
     def _update_plot_limits(self):
